@@ -119,6 +119,9 @@
             <div class="font-semibold text-gray-800 text-sm truncate">{{ $row->FullName }}</div>
             <div class="text-gray-400 text-xs font-mono mt-0.5">{{ $row->EmployeeNo }}</div>
             <div class="text-gray-400 text-xs truncate">{{ $row->BranchName }}</div>
+            @if($row->DivisionName)
+                <div class="text-gray-400 text-xs truncate">{{ $row->DivisionName }}</div>
+            @endif
             <div class="mt-2 text-xs text-violet-500 font-medium">
                 {{ \Carbon\Carbon::parse($row->ClockDate)->format('d M Y') }} · {{ substr($row->ClockTime, 0, 5) }}
             </div>

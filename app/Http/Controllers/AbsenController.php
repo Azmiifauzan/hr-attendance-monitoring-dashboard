@@ -25,11 +25,14 @@ class AbsenController extends Controller
                     crm.\"Longitude\",
                     v.\"FullName\",
                     e.\"EmployeeNo\",
-                    b.\"BranchName\"
+                    b.\"BranchName\",
+                    d.\"Name\" AS \"DivisionName\"
                 FROM \"Member\".\"ATT_ClockRequest\" A
                 JOIN \"Member\".\"CM_Employee\" e ON A.\"EmployeeId\" = e.\"EmployeeId\"
                 JOIN \"Member\".\"V_EmployeeName\" v ON e.\"EmployeeId\" = v.\"EmployeeId\"
                 JOIN \"Member\".\"CM_Branch\" b ON e.\"BranchId\" = b.\"BranchId\"
+                LEFT JOIN \"Member\".\"CM_JobTitle\" jt ON e.\"JobTitleId\" = jt.\"JobTitleId\"
+                LEFT JOIN \"Member\".\"CM_Division\" d ON jt.\"DivisionId\" = d.\"Id\"
                 LEFT JOIN \"Member\".\"ATT_ClockRequestMobile\" crm 
                     ON A.\"ClockRequestId\" = crm.\"ClockRequestId\"
                 WHERE A.\"IsDeleted\" IS FALSE
