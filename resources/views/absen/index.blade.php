@@ -41,6 +41,15 @@
                 User Management
             </a>
         @endif
+
+        {{-- Nama user --}}
+        <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-500 text-xs font-semibold flex items-center justify-center">
+                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+            </div>
+            <span class="text-sm text-gray-600 font-medium">{{ auth()->user()->name }}</span>
+        </div>
+
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="text-xs text-gray-400 hover:text-red-400 transition-colors">Keluar</button>

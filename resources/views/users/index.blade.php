@@ -52,13 +52,13 @@
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-400 mb-1.5">Nama Lengkap</label>
-                    <input name="name" type="text" placeholder="Budi Santoso"
+                    <input name="name" type="text" placeholder=" "
                         value="{{ $user->name ?? '' }}"
                         class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 transition-all">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-400 mb-1.5">Username</label>
-                    <input name="username" type="text" placeholder="budi.santoso"
+                    <input name="username" type="text" placeholder=" "
                         value="{{ $user->username ?? '' }}"
                         class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 transition-all">
                 </div>
@@ -68,7 +68,7 @@
                 <label class="block text-xs font-medium text-gray-400 mb-1.5">
                     Password @if(isset($user)) <span class="text-gray-300 normal-case">(kosongkan jika tidak diganti)</span> @endif
                 </label>
-                <input name="password" type="password" placeholder="Min. 8 karakter"
+                <input name="password" type="password" placeholder=" "
                     class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 transition-all">
             </div>
 
