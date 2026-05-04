@@ -4,6 +4,7 @@ use App\Http\Controllers\AbsenController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CompanyController;
 
 Route::get('/', [AbsenController::class, 'index'])->middleware('auth')->name('dashboard');
 Route::get('/foto/{id}', [AbsenController::class, 'foto']);
@@ -19,6 +20,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
     Route::get('/autocomplete', [AbsenController::class, 'autocomplete'])->middleware('auth');
     
+});
+Route::middleware('auth')->group(function () {
+    Route::get('/companies', [CompanyController::class, 'index']);
+    Route::post('/companies', [CompanyController::class, 'update']);
 });
 
 require __DIR__.'/auth.php';

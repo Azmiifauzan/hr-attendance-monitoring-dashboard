@@ -30,6 +30,10 @@
             <p class="text-sm text-gray-400 mt-1">Kelola akun dan hak akses per PT</p>
         </div>
         <a href="/" class="text-sm text-gray-400 hover:text-violet-500 transition-colors">← Kembali</a>
+        <a href="/companies"
+            class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-xl transition-all">
+            Kelola PT
+        </a>
     </div>
 
     {{-- Form Tambah / Edit --}}
@@ -68,6 +72,15 @@
                     class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 transition-all">
             </div>
 
+            <div class="mt-4">
+                <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Role</label>
+                    <select name="role"
+                        class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent">
+                        <option value="user" {{ isset($user) && $user->role === 'user' ? 'selected' : '' }}>User</option>
+                        <option value="admin" {{ isset($user) && $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                    </select>
+            </div>
+            
             <div class="mb-6">
                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Akses PT</label>
                 <div id="tagArea" onclick="document.getElementById('ptSearch').focus()"

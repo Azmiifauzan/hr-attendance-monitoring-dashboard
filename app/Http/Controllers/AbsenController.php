@@ -11,13 +11,30 @@ class AbsenController extends Controller
     {
         $data = [];
 
-        // Ambil list PT
-        $companies = DB::connection('hris')->select("
+        // Ambil list PT - hanya yang aktif
+        $activeCompanies = \App\Models\ActiveCompany::all();
+
+        if ($activeCompanies->isEmpty()) {
+        // Kalau belum ada yang diset, tampilkan semua
+            $companies = DB::connection('hris')->select("
             SELECT \"CompanyId\", TRIM(\"Name\") AS \"Name\"
             FROM \"Member\".\"CM_Company\"
+            WHERE \"Name\" IS NOT NULL
             GROUP BY \"CompanyId\", TRIM(\"Name\")
             ORDER BY TRIM(\"Name\")
         ");
+        } else {
+            $ids = $activeCompanies->pluck('company_id')->toArray();
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $companies = DB::connection('hris')->select("
+            SELECT \"CompanyId\", TRIM(\"Name\") AS \"Name\"
+            FROM \"Member\".\"CM_Company\"
+            WHERE \"CompanyId\" IN ($placeholders)
+            AND \"Name\" IS NOT NULL
+            GROUP BY \"CompanyId\", TRIM(\"Name\")
+            ORDER BY TRIM(\"Name\")
+            ", $ids);
+        }
 
         // Ambil divisi sesuai PT yang dipilih
         $divisions = [];
