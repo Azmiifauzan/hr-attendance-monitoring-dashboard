@@ -11,12 +11,48 @@ class AbsenController extends Controller
     {
         $data = [];
 
-        if ($request->filled('keyword') && $request->filled('tanggal')) {
+        // Ambil list PT
+        $companies = DB::connection('hris')->select("
+            SELECT \"CompanyId\", TRIM(\"Name\") AS \"Name\"
+            FROM \"Member\".\"CM_Company\"
+            GROUP BY \"CompanyId\", TRIM(\"Name\")
+            ORDER BY TRIM(\"Name\")
+        ");
 
-            $keyword = $request->keyword;
-            $tanggal = $request->tanggal;
+        // Ambil divisi sesuai PT yang dipilih
+        $divisions = [];
+        if ($request->filled('company_id')) {
+            $divisions = DB::connection('hris')->select("
+                SELECT \"Id\", TRIM(\"Name\") AS \"Name\"
+                FROM \"Member\".\"CM_Division\"
+                WHERE \"IsDeleted\" IS FALSE
+                AND \"CompanyId\" = ?
+                AND TRIM(\"Name\") IS NOT NULL
+                GROUP BY \"Id\", TRIM(\"Name\")
+                ORDER BY TRIM(\"Name\")
+            ", [$request->company_id]);
+        }
 
-           $data = DB::connection('hris')->select("
+        if ($request->filled('tanggal_dari') || $request->filled('tanggal')) {
+
+            $keyword    = $request->keyword;
+            $tanggalDari  = $request->tanggal_dari ?? $request->tanggal;
+            $tanggalSampai = $request->tanggal_sampai ?? $tanggalDari;
+            $divisionId  = $request->division_id;
+            $companyId   = $request->company_id;
+
+            $keywordFilter  = $keyword    ? "AND (v.\"FullName\" ILIKE ? OR e.\"EmployeeNo\" ILIKE ?)" : "";
+            $divisionFilter  = $divisionId  ? "AND d.\"Id\" = ?"        : "";
+            $companyFilter   = $companyId   ? "AND e.\"CompanyId\" = ?"  : "";
+
+            $params = [];
+            if ($keyword)    { $params[] = "%$keyword%"; $params[] = "%$keyword%"; }
+            $params[] = $tanggalDari;
+            $params[] = $tanggalSampai;
+            if ($companyId)  $params[] = $companyId;
+            if ($divisionId) $params[] = $divisionId;
+
+            $data = DB::connection('hris')->select("
                 SELECT 
                     A.\"ClockRequestId\",
                     A.\"ClockDate\",
@@ -26,53 +62,47 @@ class AbsenController extends Controller
                     v.\"FullName\",
                     e.\"EmployeeNo\",
                     b.\"BranchName\",
-                    d.\"Name\" AS \"DivisionName\"
+                    TRIM(d.\"Name\") AS \"DivisionName\",
+                    TRIM(c.\"Name\") AS \"CompanyName\"
                 FROM \"Member\".\"ATT_ClockRequest\" A
                 JOIN \"Member\".\"CM_Employee\" e ON A.\"EmployeeId\" = e.\"EmployeeId\"
                 JOIN \"Member\".\"V_EmployeeName\" v ON e.\"EmployeeId\" = v.\"EmployeeId\"
                 JOIN \"Member\".\"CM_Branch\" b ON e.\"BranchId\" = b.\"BranchId\"
+                JOIN \"Member\".\"CM_Company\" c ON e.\"CompanyId\" = c.\"CompanyId\"
                 LEFT JOIN \"Member\".\"CM_JobTitle\" jt ON e.\"JobTitleId\" = jt.\"JobTitleId\"
                 LEFT JOIN \"Member\".\"CM_Division\" d ON jt.\"DivisionId\" = d.\"Id\"
                 LEFT JOIN \"Member\".\"ATT_ClockRequestMobile\" crm 
                     ON A.\"ClockRequestId\" = crm.\"ClockRequestId\"
                 WHERE A.\"IsDeleted\" IS FALSE
-                AND (
-                    v.\"FullName\" ILIKE ?
-                    OR e.\"EmployeeNo\" ILIKE ?
-                )
-                AND DATE(A.\"ClockDate\") = ?
-                ORDER BY A.\"ClockTime\" DESC
-            ", ["%$keyword%", "%$keyword%", $tanggal]);
+                $keywordFilter
+                AND DATE(A.\"ClockDate\") BETWEEN ? AND ?
+                $companyFilter
+                $divisionFilter
+                ORDER BY A.\"ClockDate\" DESC, A.\"ClockTime\" DESC
+            ", $params);
         }
 
-        // 🔥 INI YANG KAMU KURANG
-        return view('absen.index', compact('data'));
+        return view('absen.index', compact('data', 'companies', 'divisions'));
     }
 
-    public function foto($id)
+    public function getDivisions(Request $request)
     {
-        $data = DB::connection('hris')->selectOne("
-            SELECT \"ClockDate\"
-            FROM \"Member\".\"ATT_ClockRequest\"
-            WHERE \"ClockRequestId\" = ?
-        ", [$id]);
+        $companyId = $request->company_id;
+        if (!$companyId) return response()->json([]);
 
-        if (!$data) {
-            abort(404, 'Data tidak ditemukan');
-        }
+        $divisions = DB::connection('hris')->select("
+            SELECT \"Id\", TRIM(\"Name\") AS \"Name\"
+            FROM \"Member\".\"CM_Division\"
+            WHERE \"IsDeleted\" IS FALSE
+            AND \"CompanyId\" = ?
+            AND TRIM(\"Name\") IS NOT NULL
+            GROUP BY \"Id\", TRIM(\"Name\")
+            ORDER BY TRIM(\"Name\")
+        ", [$companyId]);
 
-        $dt = new \DateTime($data->ClockDate);
-        $tahun = $dt->format('Y');
-        $bulan = $dt->format('m');
-
-        $path = "E:/FOTO/$tahun/$bulan/$id.jpg";
-
-        if (!file_exists($path)) {
-            return response("File tidak ditemukan: $path", 404);
-        }
-
-        return response()->file($path);
+        return response()->json($divisions);
     }
+
     public function autocomplete(Request $request)
     {
         $keyword = $request->q;
@@ -87,5 +117,25 @@ class AbsenController extends Controller
         ", ["%$keyword%", "%$keyword%"]);
 
         return response()->json($results);
+    }
+
+    public function foto($id)
+    {
+        $data = DB::connection('hris')->selectOne("
+            SELECT \"ClockDate\"
+            FROM \"Member\".\"ATT_ClockRequest\"
+            WHERE \"ClockRequestId\" = ?
+        ", [$id]);
+
+        if (!$data) abort(404, 'Data tidak ditemukan');
+
+        $dt = new \DateTime($data->ClockDate);
+        $tahun = $dt->format('Y');
+        $bulan = $dt->format('m');
+        $path = "E:/FOTO/$tahun/$bulan/$id.jpg";
+
+        if (!file_exists($path)) return response("File tidak ditemukan: $path", 404);
+
+        return response()->file($path);
     }
 }

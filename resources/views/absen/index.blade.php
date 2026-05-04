@@ -13,7 +13,9 @@
         .s-avatar { width: 30px; height: 30px; border-radius: 50%; background: #ede9fe; color: #7c3aed; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .s-name { font-size: 13px; font-weight: 500; color: #1f2937; }
         .s-nik { font-size: 11px; color: #9ca3af; font-family: monospace; }
-        input[type=date]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.5; }
+        #divisionSuggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); z-index: 50; margin-top: 4px; overflow: hidden; max-height: 200px; overflow-y: auto; }
+        .div-item { padding: 9px 14px; cursor: pointer; font-size: 13px; color: #374151; }
+        .div-item:hover { background: #f5f3ff; color: #6d28d9; }
     </style>
 </head>
 <body class="min-h-screen" style="background: #f8f7ff">
@@ -46,12 +48,11 @@
     </div>
 </div>
 
-{{-- Hero Search Area --}}
-<div class="flex flex-col items-center justify-center px-4 pt-16 pb-10">
+{{-- Hero Search --}}
+<div class="flex flex-col items-center justify-center px-4 pt-12 pb-8">
 
-    {{-- Ilustrasi kecil --}}
-    <div class="mb-5">
-        <svg viewBox="0 0 120 80" width="120" height="80">
+    <div class="mb-4">
+        <svg viewBox="0 0 120 80" width="100" height="67">
             <rect x="10" y="15" width="100" height="55" rx="8" fill="#ede9fe"/>
             <rect x="20" y="25" width="44" height="35" rx="4" fill="#AFA9EC"/>
             <circle cx="42" cy="37" r="9" fill="#7F77DD"/>
@@ -65,14 +66,16 @@
     </div>
 
     <h1 class="text-2xl font-semibold text-gray-800 mb-1">Cari Foto Absensi</h1>
-    <p class="text-sm text-gray-400 mb-8">Ketik nama atau NIK karyawan untuk melihat foto absensi</p>
+    <p class="text-sm text-gray-400 mb-6">Ketik nama atau NIK, pilih divisi dan rentang tanggal</p>
 
-    {{-- Form --}}
-    <form method="GET" id="searchForm" class="w-full max-w-xl">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex gap-3 items-end">
+    <form method="GET" id="searchForm" class="w-full max-w-3xl">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
 
-            {{-- Input Nama --}}
-            <div class="flex-1 relative">
+        {{-- Baris 1: Nama + PT --}}
+        <div class="grid grid-cols-2 gap-3 mb-3">
+
+            {{-- Nama / NIK --}}
+            <div class="relative">
                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Nama / NIK</label>
                 <input type="text" name="keyword" id="keywordInput"
                     autocomplete="off"
@@ -82,22 +85,66 @@
                 <div id="suggestions" class="hidden"></div>
             </div>
 
-            {{-- Input Tanggal --}}
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">Tanggal</label>
-                <input type="date" name="tanggal"
-                    value="{{ request('tanggal') }}"
-                    class="px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent">
+            {{-- PT --}}
+            <div class="relative">
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">PT</label>
+                <input type="text" id="companySearch"
+                    autocomplete="off"
+                    placeholder="Pilih PT..."
+                    value="{{ request('company_name') }}"
+                    class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent">
+                <input type="hidden" name="company_id" id="companyId" value="{{ request('company_id') }}">
+                <input type="hidden" name="company_name" id="companyName" value="{{ request('company_name') }}">
+                <div id="companySuggestions" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08);z-index:50;margin-top:4px;max-height:200px;overflow-y:auto;">
+                    <div class="div-item" onclick="pickCompany('','')">Semua PT</div>
+                    @foreach($companies as $co)
+                        <div class="div-item" onclick="pickCompany('{{ $co->CompanyId }}','{{ addslashes($co->Name) }}')">
+                            {{ $co->Name }}
+                        </div>
+                    @endforeach
+                </div>
             </div>
+        </div>
 
-            {{-- Tombol Cari --}}
-            <button type="submit" id="searchBtn"
-                onclick="this.innerText='...'"
-                class="px-5 py-2.5 bg-violet-500 hover:bg-violet-600 active:scale-95 text-white text-sm font-medium rounded-xl transition-all">
+        {{-- Baris 2: Divisi --}}
+        <div class="mb-3">
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">Divisi <span class="text-gray-300 normal-case font-normal">(pilih PT dulu)</span></label>
+            <div class="relative">
+                <input type="text" id="divisionSearch"
+                    autocomplete="off"
+                    placeholder="Pilih divisi..."
+                    value="{{ request('division_name') }}"
+                    class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent"
+                    {{ !request('company_id') ? 'disabled' : '' }}>
+                <input type="hidden" name="division_id" id="divisionId" value="{{ request('division_id') }}">
+                <input type="hidden" name="division_name" id="divisionName" value="{{ request('division_name') }}">
+                <div id="divisionSuggestions" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08);z-index:50;margin-top:4px;max-height:200px;overflow-y:auto;">
+                </div>
+            </div>
+        </div>
+
+        {{-- Baris 3: Tanggal + Cari --}}
+        <div class="flex gap-3 items-end">
+            <div class="flex-1">
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">Dari Tanggal</label>
+                <input type="date" name="tanggal_dari"
+                    value="{{ request('tanggal_dari') }}"
+                    class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent">
+            </div>
+            <div class="flex-1">
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">Sampai Tanggal</label>
+                <input type="date" name="tanggal_sampai"
+                    value="{{ request('tanggal_sampai') }}"
+                    class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent">
+            </div>
+            <button type="submit"
+                class="px-6 py-2.5 bg-violet-500 hover:bg-violet-600 active:scale-95 text-white text-sm font-medium rounded-xl transition-all whitespace-nowrap">
                 Cari
             </button>
         </div>
-    </form>
+
+    </div>
+</form>
 </div>
 
 {{-- Hasil --}}
@@ -109,7 +156,7 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         @foreach($data as $row)
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
-            onclick="openModal('{{ $row->ClockRequestId }}', '{{ $row->ClockDate }}', '{{ $row->Latitude ?? '' }}', '{{ $row->Longitude ?? '' }}')">
+            onclick="openModal('{{ $row->ClockRequestId }}', '{{ $row->Latitude ?? '' }}', '{{ $row->Longitude ?? '' }}')">
 
             <div class="w-full h-40 overflow-hidden rounded-xl bg-gray-100 mb-3">
                 <img src="{{ url('/foto/'.$row->ClockRequestId) }}"
@@ -145,22 +192,17 @@
 </div>
 
 <script>
+// ── Autocomplete Nama ──
 let debounceTimer;
-
 document.getElementById('keywordInput').addEventListener('input', function() {
     clearTimeout(debounceTimer);
     const q = this.value.trim();
-    if (q.length < 2) {
-        document.getElementById('suggestions').classList.add('hidden');
-        return;
-    }
+    if (q.length < 2) { document.getElementById('suggestions').classList.add('hidden'); return; }
     debounceTimer = setTimeout(() => fetchSuggestions(q), 300);
 });
-
 document.getElementById('keywordInput').addEventListener('blur', function() {
     setTimeout(() => document.getElementById('suggestions').classList.add('hidden'), 200);
 });
-
 function fetchSuggestions(q) {
     fetch('/autocomplete?q=' + encodeURIComponent(q))
         .then(r => r.json())
@@ -171,22 +213,88 @@ function fetchSuggestions(q) {
                 const initials = d.FullName.split(' ').slice(0,2).map(n => n[0]).join('').toUpperCase();
                 return `<div class="suggestion-item" onmousedown="pickSuggestion('${d.FullName.replace(/'/g,"\\'")}')">
                     <div class="s-avatar">${initials}</div>
-                    <div>
-                        <div class="s-name">${d.FullName}</div>
-                        <div class="s-nik">${d.EmployeeNo}</div>
-                    </div>
+                    <div><div class="s-name">${d.FullName}</div><div class="s-nik">${d.EmployeeNo}</div></div>
                 </div>`;
             }).join('');
             box.classList.remove('hidden');
         });
 }
-
 function pickSuggestion(name) {
     document.getElementById('keywordInput').value = name;
     document.getElementById('suggestions').classList.add('hidden');
 }
 
-function openModal(id, tanggal, lat, lng) {
+// ── Dropdown PT ──
+const compSearch = document.getElementById('companySearch');
+const compDropdown = document.getElementById('companySuggestions');
+const allCompItems = Array.from(compDropdown.querySelectorAll('.div-item'));
+
+compSearch.addEventListener('focus', () => { filterCompany(compSearch.value); compDropdown.classList.remove('hidden'); });
+compSearch.addEventListener('input', function() { filterCompany(this.value); compDropdown.classList.remove('hidden'); });
+compSearch.addEventListener('blur', () => { setTimeout(() => compDropdown.classList.add('hidden'), 200); });
+
+function filterCompany(q) {
+    allCompItems.forEach(el => {
+        el.style.display = el.textContent.trim().toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+    });
+}
+function pickCompany(id, name) {
+    document.getElementById('companyId').value = id;
+    document.getElementById('companyName').value = name;
+    document.getElementById('companySearch').value = name;
+    compDropdown.classList.add('hidden');
+
+    // reset divisi
+    document.getElementById('divisionId').value = '';
+    document.getElementById('divisionName').value = '';
+    document.getElementById('divisionSearch').value = '';
+    document.getElementById('divisionSearch').disabled = !id;
+
+    // load divisi baru
+    if (id) loadDivisions(id);
+    else document.getElementById('divisionSuggestions').innerHTML = '';
+}
+
+// ── Dropdown Divisi (dynamic) ──
+const divSearch = document.getElementById('divisionSearch');
+const divDropdown = document.getElementById('divisionSuggestions');
+
+divSearch.addEventListener('focus', () => { divDropdown.classList.remove('hidden'); });
+divSearch.addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    divDropdown.querySelectorAll('.div-item').forEach(el => {
+        el.style.display = el.textContent.trim().toLowerCase().includes(q) ? '' : 'none';
+    });
+    divDropdown.classList.remove('hidden');
+});
+divSearch.addEventListener('blur', () => { setTimeout(() => divDropdown.classList.add('hidden'), 200); });
+
+function loadDivisions(companyId) {
+    fetch('/get-divisions?company_id=' + companyId)
+        .then(r => r.json())
+        .then(data => {
+            divDropdown.innerHTML = `<div class="div-item" onclick="pickDivision('','')">Semua divisi</div>`;
+            data.forEach(d => {
+                divDropdown.innerHTML += `<div class="div-item" onclick="pickDivision('${d.Id}','${d.Name.replace(/'/g,"\\'")}')">
+                    ${d.Name}
+                </div>`;
+            });
+        });
+}
+function pickDivision(id, name) {
+    document.getElementById('divisionId').value = id;
+    document.getElementById('divisionName').value = name;
+    document.getElementById('divisionSearch').value = name;
+    divDropdown.classList.add('hidden');
+}
+
+// Pre-load divisi kalau PT sudah dipilih sebelumnya
+@if(request('company_id'))
+    loadDivisions('{{ request('company_id') }}');
+@endif
+
+// ── Modal ──
+function openModal(id, lat, lng) {
     document.getElementById('modal').classList.remove('hidden');
     document.getElementById('modalImg').src = '/foto/' + id;
     if (lat && lng) {
@@ -195,7 +303,6 @@ function openModal(id, tanggal, lat, lng) {
         document.getElementById('mapFrame').src = '';
     }
 }
-
 document.getElementById('modal').addEventListener('click', function(e) {
     if (e.target.id === 'modal') this.classList.add('hidden');
 });
