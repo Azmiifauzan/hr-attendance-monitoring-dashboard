@@ -96,7 +96,6 @@
                 <input type="hidden" name="company_id" id="companyId" value="{{ request('company_id') }}">
                 <input type="hidden" name="company_name" id="companyName" value="{{ request('company_name') }}">
                 <div id="companySuggestions" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08);z-index:50;margin-top:4px;max-height:200px;overflow-y:auto;">
-                    <div class="div-item" onclick="pickCompany('','')">Semua PT</div>
                     @foreach($companies as $co)
                         <div class="div-item" onclick="pickCompany('{{ $co->CompanyId }}','{{ addslashes($co->Name) }}')">
                             {{ $co->Name }}
