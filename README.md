@@ -38,7 +38,7 @@ A web-based attendance monitoring system built with Laravel to help HR teams man
 
 ### User Management
 
-Attendance](screenshots/usermanagement.png)
+![usermanagement](screenshots/usermanagement.png)
 
 ## Purpose
 
