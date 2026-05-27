@@ -26,6 +26,9 @@ services:
       - app
     networks:
       - liatfoto_network
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
 
   db:
     image: postgres:15
