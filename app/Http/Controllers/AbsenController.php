@@ -188,7 +188,7 @@ class AbsenController extends Controller
         $dt = new \DateTime($data->ClockDate);
         $tahun = $dt->format('Y');
         $bulan = $dt->format('m');
-        $path = "E:/FOTO/$tahun/$bulan/$id.jpg";
+        $path = "/mnt/foto/FOTO/$tahun/$bulan/$id.jpg";
 
         if (!file_exists($path)) return response("File tidak ditemukan: $path", 404);
 
