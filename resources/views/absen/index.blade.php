@@ -168,10 +168,11 @@
 
             <div class="w-full h-40 overflow-hidden rounded-xl bg-gray-100 mb-3">
                 <img src="{{ url('/foto/'.$row->ClockRequestId) }}"
-                    class="w-full h-full object-cover"
+                    class="w-full h-full object-cover">
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-            <div class="w-full h-full hidden items-center justify-center bg-gray-100">
-                <span class="text-xs text-gray-400">FOTO GAK ADA</span>
+                <div class="w-full h-full hidden items-center justify-center bg-gray-100">
+                    <span class="text-xs text-gray-400">Foto tidak tersedia</span>
+                </div>
             </div>
 
             <div class="font-semibold text-gray-800 text-sm truncate">{{ $row->FullName }}</div>
