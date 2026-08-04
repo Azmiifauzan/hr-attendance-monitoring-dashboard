@@ -168,6 +168,7 @@
 
             <div class="w-full h-40 overflow-hidden rounded-xl bg-gray-100 mb-3">
                 <img src="{{ url('/foto/'.$row->ClockRequestId) }}"
+                    alt="Foto absensi {{ $row->EmployeeNo }}"
                     class="w-full h-full object-cover">
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="w-full h-full hidden items-center justify-center bg-gray-100">
