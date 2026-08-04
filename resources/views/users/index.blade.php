@@ -128,6 +128,9 @@
         </div>
 
         <table class="w-full text-sm">
+            <caption class="sr-only">
+                Daftar pengguna
+            </caption>
             <thead>
                 <tr class="border-b border-gray-100">
                     <th class="text-left py-2 px-3 text-xs font-medium text-gray-300 uppercase tracking-widest">User</th>

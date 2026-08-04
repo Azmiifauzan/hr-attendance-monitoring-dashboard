@@ -199,7 +199,11 @@
             <img id="modalImg" class="max-h-full max-w-full object-contain" alt="Foto absensi {{ $row->EmployeeNo }}">
         </div>
         <div class="w-1/2">
-            <iframe id="mapFrame" class="w-full h-full border-0"></iframe>
+            <iframe
+                id="mapFrame"
+                title="Peta lokasi absensi"
+                class="w-full h-full border-0">
+            </iframe>
         </div>
     </div>
 </div>
