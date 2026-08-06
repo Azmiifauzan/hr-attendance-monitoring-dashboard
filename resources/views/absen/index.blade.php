@@ -168,7 +168,6 @@
 
             <div class="w-full h-40 overflow-hidden rounded-xl bg-gray-100 mb-3">
                 <img src="{{ url('/foto/'.$row->ClockRequestId) }}"
-                    alt="Foto absensi {{ $row->EmployeeNo }}"
                     class="w-full h-full object-cover">
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="w-full h-full hidden items-center justify-center bg-gray-100">
@@ -196,7 +195,7 @@
 <div id="modal" class="fixed inset-0 bg-black bg-opacity-80 hidden z-50 flex items-center justify-center">
     <div class="bg-white rounded-2xl w-[90%] max-w-4xl h-[85vh] flex overflow-hidden">
         <div class="w-1/2 bg-black flex items-center justify-center">
-            <img id="modalImg" class="max-h-full max-w-full object-contain" alt="Foto absensi {{ $row->EmployeeNo }}">
+            <img id="modalImg" class="max-h-full max-w-full object-contain">
         </div>
         <div class="w-1/2">
             <iframe id="mapFrame" class="w-full h-full border-0"></iframe>
