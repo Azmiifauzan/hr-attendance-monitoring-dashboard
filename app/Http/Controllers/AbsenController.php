@@ -195,14 +195,20 @@ class AbsenController extends Controller
         $pathInternalLama = "/mnt/data-internal/FOTO/$tahun/$bulan/$id.jpg";
         $pathExternalLama = "/mnt/foto/FOTO/$tahun/$bulan/$id.jpg";
 
+        if ($tahun > 2026 || ($tahun == 2026 && $bulan >= 7)) {
+        // Cek path baru aja
+            $pathInternal = "/mnt/data-internal/FOTO/$tahun/$bulan/$hari/$id.jpg";
+            $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$hari/$id.jpg";
+        } else {
+        // Cek path lama aja
+            $pathInternal = "/mnt/data-internal/FOTO/$tahun/$bulan/$id.jpg";
+            $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$id.jpg";
+        }
+
         if (file_exists($pathInternal)) {
             return response()->file($pathInternal);
         } elseif (file_exists($pathExternal)) {
             return response()->file($pathExternal);
-        } elseif(file_exists($pathInternalLama)) {
-            return response()->file($pathExternalLama);
-        } elseif (file_exists($pathExternalLama)) {
-            return response()->file($pathExternalLama);
         } else {
             return response("File tidak ditemukan", 404);
         }
