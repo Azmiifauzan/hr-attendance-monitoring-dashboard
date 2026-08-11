@@ -189,7 +189,7 @@ class AbsenController extends Controller
         $tahun = $dt->format('Y');
         $bulan = $dt->format('m');
         $hari = $dt->format('d');
-        $pathInternal = "/mnt/data-internal/FOTO/$tahun/$bulan/$hari/$id.jpg";
+        $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$id.jpg";
         $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$hari/$id.jpg";
 
         $pathInternalLama = "/mnt/data-internal/FOTO/$tahun/$bulan/$id.jpg";
@@ -197,11 +197,11 @@ class AbsenController extends Controller
 
         if ($tahun > 2026 || ($tahun == 2026 && $bulan >= 7)) {
         // Cek path baru aja
-            $pathInternal = "/mnt/data-internal/FOTO/$tahun/$bulan/$hari/$id.jpg";
+            $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$id.jpg";
             $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$hari/$id.jpg";
         } else {
         // Cek path lama aja
-            $pathInternal = "/mnt/data-internal/FOTO/$tahun/$bulan/$id.jpg";
+            $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$id.jpg";
             $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$id.jpg";
         }
 
