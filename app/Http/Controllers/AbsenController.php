@@ -197,11 +197,11 @@ class AbsenController extends Controller
 
         if ($tahun > 2026 || ($tahun == 2026 && $bulan >= 7)) {
         // Cek path baru aja
-            $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$id.jpg";
+            $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$hari/$id.jpg";
             $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$hari/$id.jpg";
         } else {
         // Cek path lama aja
-            $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$id.jpg";
+            $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$hari/$id.jpg";
             $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$id.jpg";
         }
 
