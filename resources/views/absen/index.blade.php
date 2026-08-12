@@ -20,6 +20,16 @@
         .div-item:hover { background: #f5f3ff; color: #6d28d9; }
         .spinner { border: 3px solid #e5e7eb; border-top: 3px solid #7c3aed; border-radius: 50%; width: 32px; height: 32px; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-overlay{position:fixed;inset:0;background:rgba(248,247,255,0.75);backdrop-filter:blur(4px);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+        .ring{width:80px;height:80px;border-radius:50%;border:3px solid #e5e7eb;border-top:3px solid #7F77DD;animation:spin 1s linear infinite;position:absolute}
+        .ring2{width:80px;height:80px;border-radius:50%;border:3px solid transparent;border-bottom:3px solid #AFA9EC;animation:spin 1.5s linear infinite reverse;position:absolute}
+        .icon-wrap{width:80px;height:80px;display:flex;align-items:center;justify-content:center;position:relative}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        @keyframes pulse{0%,100%{opacity:0.6;transform:scale(0.97)}50%{opacity:1;transform:scale(1)}}
+        .silhouette{animation:pulse 1.5s ease-in-out infinite}
+        .loading-text{font-size:13px;color:#6b7280;animation:pulse 1.5s ease-in-out infinite}
+        .dots::after{content:'';animation:dots 1.2s steps(4,end) infinite}
+        @keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}100%{content:''}}
     </style>
 </head>
 <body class="min-h-screen" style="background: #f8f7ff">
@@ -209,7 +219,8 @@
 
 <script>
 function showLoading() {
-    document.getElementById('loadingIndicator').classList.remove('hidden');
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.style.display = 'flex';
 }
 
 // ── Autocomplete Nama ──
@@ -322,6 +333,20 @@ document.getElementById('modal').addEventListener('click', function(e) {
     if (e.target.id === 'modal') this.classList.add('hidden');
 });
 </script>
-
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="icon-wrap">
+        <div class="ring"></div>
+        <div class="ring2"></div>
+        <svg viewBox="-48 -48 96 96" width="44" height="44" class="silhouette">
+            <circle cx="0" cy="-16" r="11" fill="#7F77DD"/>
+            <path d="M-14 -2 Q-18 18 -14 28 L14 28 Q18 18 14 -2 Z" fill="#7F77DD"/>
+            <rect x="10" y="2" width="16" height="12" rx="3" fill="#534AB7" opacity="0.85"/>
+            <circle cx="18" cy="8" r="3.5" fill="#EEEDFE"/>
+            <rect x="20" y="3" width="4" height="3" rx="1" fill="#534AB7"/>
+            <circle cx="26" cy="0" r="2" fill="#FAC775" opacity="0.9"/>
+        </svg>
+    </div>
+    <div class="loading-text">Sedang mencari<span class="dots"></span></div>
+</div>
 </body>
 </html>
