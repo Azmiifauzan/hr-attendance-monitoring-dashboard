@@ -189,7 +189,7 @@ class AbsenController extends Controller
         $tahun = $dt->format('Y');
         $bulan = $dt->format('m');
         $hari = $dt->format('d');
-        $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$id.jpg";
+        $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$hari/$id.jpg";
         $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$hari/$id.jpg";
 
         $pathInternalLama = "/mnt/data-internal/FOTO/$tahun/$bulan/$id.jpg";
