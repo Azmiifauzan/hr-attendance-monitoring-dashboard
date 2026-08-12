@@ -2,8 +2,10 @@
 <html lang="id">
 <head>
     <title>Liat Foto Absensi Karyawan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/favicon.png">
     <style>
         body { font-family: 'Figtree', sans-serif; }
         #suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); z-index: 50; margin-top: 4px; overflow: hidden; }
@@ -13,17 +15,19 @@
         .s-avatar { width: 30px; height: 30px; border-radius: 50%; background: #ede9fe; color: #7c3aed; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .s-name { font-size: 13px; font-weight: 500; color: #1f2937; }
         .s-nik { font-size: 11px; color: #9ca3af; font-family: monospace; }
-        #divisionSuggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); z-index: 50; margin-top: 4px; overflow: hidden; max-height: 200px; overflow-y: auto; }
+        #divisionSuggestions, #companySuggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); z-index: 50; margin-top: 4px; max-height: 200px; overflow-y: auto; }
         .div-item { padding: 9px 14px; cursor: pointer; font-size: 13px; color: #374151; }
         .div-item:hover { background: #f5f3ff; color: #6d28d9; }
+        .spinner { border: 3px solid #e5e7eb; border-top: 3px solid #7c3aed; border-radius: 50%; width: 32px; height: 32px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="min-h-screen" style="background: #f8f7ff">
 
 {{-- Navbar --}}
-<div class="border-b border-gray-100 bg-white px-6 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 bg-violet-500 rounded-lg flex items-center justify-center">
+<div class="border-b border-gray-100 bg-white px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-violet-500 rounded-lg flex items-center justify-center flex-shrink-0">
             <svg viewBox="-48 -48 96 96" width="22" height="22">
                 <circle cx="0" cy="-16" r="11" fill="white"/>
                 <path d="M-14 -2 Q-18 18 -14 28 L14 28 Q18 18 14 -2 Z" fill="white"/>
@@ -33,23 +37,20 @@
                 <circle cx="26" cy="0" r="2" fill="#FAC775" opacity="0.9"/>
             </svg>
         </div>
-        <span class="font-semibold text-gray-800 text-sm">Absensi Foto</span>
+        <span class="font-semibold text-gray-800 text-sm hidden sm:block">Absensi Foto</span>
     </div>
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2">
         @if(auth()->user()->role === 'admin')
-            <a href="/users" class="text-xs bg-violet-500 hover:bg-violet-600 text-white px-3.5 py-1.5 rounded-lg transition-colors font-medium">
+            <a href="/users" class="text-xs bg-violet-500 hover:bg-violet-600 text-white px-3 py-1.5 rounded-lg transition-colors font-medium">
                 User Management
             </a>
         @endif
-
-        {{-- Nama user --}}
-        <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-500 text-xs font-semibold flex items-center justify-center">
+        <div class="flex items-center gap-1.5">
+            <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-500 text-xs font-semibold flex items-center justify-center flex-shrink-0">
                 {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
             </div>
-            <span class="text-sm text-gray-600 font-medium">{{ auth()->user()->name }}</span>
+            <span class="text-sm text-gray-600 font-medium hidden sm:block">{{ auth()->user()->name }}</span>
         </div>
-
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="text-xs text-gray-400 hover:text-red-400 transition-colors">Keluar</button>
@@ -58,10 +59,10 @@
 </div>
 
 {{-- Hero Search --}}
-<div class="flex flex-col items-center justify-center px-4 pt-12 pb-8">
+<div class="flex flex-col items-center justify-center px-4 pt-8 pb-6">
 
-    <div class="mb-4">
-        <svg viewBox="0 0 120 80" width="100" height="67">
+    <div class="mb-3 hidden sm:block">
+        <svg viewBox="0 0 120 80" width="90" height="60">
             <rect x="10" y="15" width="100" height="55" rx="8" fill="#ede9fe"/>
             <rect x="20" y="25" width="44" height="35" rx="4" fill="#AFA9EC"/>
             <circle cx="42" cy="37" r="9" fill="#7F77DD"/>
@@ -74,114 +75,117 @@
         </svg>
     </div>
 
-    <h1 class="text-2xl font-semibold text-gray-800 mb-1">Cari Foto Absensi</h1>
-    <p class="text-sm text-gray-400 mb-6">Ketik nama atau NIK, pilih divisi dan rentang tanggal</p>
+    <h1 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-1">Cari Foto Absensi</h1>
+    <p class="text-xs sm:text-sm text-gray-400 mb-5 text-center">Ketik nama atau NIK, pilih PT, divisi dan rentang tanggal</p>
 
     <form method="GET" id="searchForm" class="w-full max-w-3xl">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
 
-        {{-- Baris 1: Nama + PT --}}
-        <div class="grid grid-cols-2 gap-3 mb-3">
+            {{-- Nama + PT --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <div class="relative">
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Nama / NIK</label>
+                    <input type="text" name="keyword" id="keywordInput"
+                        autocomplete="off"
+                        placeholder="Cari nama atau no karyawan..."
+                        value="{{ request('keyword') }}"
+                        class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent">
+                    <div id="suggestions" class="hidden"></div>
+                </div>
 
-            {{-- Nama / NIK --}}
-            <div class="relative">
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">Nama / NIK</label>
-                <input type="text" name="keyword" id="keywordInput"
-                    autocomplete="off"
-                    placeholder="Cari nama atau no karyawan..."
-                    value="{{ request('keyword') }}"
-                    class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent">
-                <div id="suggestions" class="hidden"></div>
-            </div>
-
-            {{-- PT --}}
-            <div class="relative">
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">PT</label>
-                <input type="text" id="companySearch"
-                    autocomplete="off"
-                    placeholder="Pilih PT..."
-                    value="{{ request('company_name') }}"
-                    class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent">
-                <input type="hidden" name="company_id" id="companyId" value="{{ request('company_id') }}">
-                <input type="hidden" name="company_name" id="companyName" value="{{ request('company_name') }}">
-                <div id="companySuggestions" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08);z-index:50;margin-top:4px;max-height:200px;overflow-y:auto;">
-                    @foreach($companies as $co)
-                        <div class="div-item" onclick="pickCompany('{{ $co->CompanyId }}','{{ addslashes($co->Name) }}')">
-                            {{ $co->Name }}
-                        </div>
-                    @endforeach
+                <div class="relative">
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">PT</label>
+                    <input type="text" id="companySearch"
+                        autocomplete="off"
+                        placeholder="Pilih PT..."
+                        value="{{ request('company_name') }}"
+                        class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent">
+                    <input type="hidden" name="company_id" id="companyId" value="{{ request('company_id') }}">
+                    <input type="hidden" name="company_name" id="companyName" value="{{ request('company_name') }}">
+                    <div id="companySuggestions" class="hidden">
+                        @foreach($companies as $co)
+                            <div class="div-item" onclick="pickCompany('{{ $co->CompanyId }}','{{ addslashes($co->Name) }}')">
+                                {{ $co->Name }}
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Baris 2: Divisi --}}
-        <div class="mb-3">
-            <label class="block text-xs font-medium text-gray-400 mb-1.5">Divisi <span class="text-gray-300 normal-case font-normal">(pilih PT dulu)</span></label>
-            <div class="relative">
-                <input type="text" id="divisionSearch"
-                    autocomplete="off"
-                    placeholder="Pilih divisi..."
-                    value="{{ request('division_name') }}"
-                    class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent"
-                    {{ !request('company_id') ? 'disabled' : '' }}>
-                <input type="hidden" name="division_id" id="divisionId" value="{{ request('division_id') }}">
-                <input type="hidden" name="division_name" id="divisionName" value="{{ request('division_name') }}">
-                <div id="divisionSuggestions" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08);z-index:50;margin-top:4px;max-height:200px;overflow-y:auto;">
+            {{-- Divisi --}}
+            <div class="mb-3">
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">Divisi <span class="text-gray-300 font-normal">(pilih PT dulu)</span></label>
+                <div class="relative">
+                    <input type="text" id="divisionSearch"
+                        autocomplete="off"
+                        placeholder="Pilih divisi..."
+                        value="{{ request('division_name') }}"
+                        class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent disabled:opacity-50"
+                        {{ !request('company_id') ? 'disabled' : '' }}>
+                    <input type="hidden" name="division_id" id="divisionId" value="{{ request('division_id') }}">
+                    <input type="hidden" name="division_name" id="divisionName" value="{{ request('division_name') }}">
+                    <div id="divisionSuggestions" class="hidden"></div>
                 </div>
             </div>
-        </div>
 
-        {{-- Baris 3: Tanggal + Cari --}}
-        <div class="flex gap-3 items-end">
-            <div class="flex-1">
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">Dari Tanggal</label>
-                <input type="date" name="tanggal_dari"
-                    value="{{ request('tanggal_dari') }}"
-                    class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent">
+            {{-- Tanggal + Cari --}}
+            <div class="grid grid-cols-2 sm:flex gap-3 items-end">
+                <div class="flex-1">
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Dari Tanggal</label>
+                    <input type="date" name="tanggal_dari"
+                        value="{{ request('tanggal_dari') }}"
+                        class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400">
+                </div>
+                <div class="flex-1">
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Sampai Tanggal</label>
+                    <input type="date" name="tanggal_sampai"
+                        value="{{ request('tanggal_sampai') }}"
+                        class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400">
+                </div>
+                <button type="submit" id="searchBtn"
+                    onclick="showLoading()"
+                    class="col-span-2 sm:col-span-1 px-6 py-2.5 bg-violet-500 hover:bg-violet-600 active:scale-95 text-white text-sm font-medium rounded-xl transition-all whitespace-nowrap">
+                    Cari
+                </button>
             </div>
-            <div class="flex-1">
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">Sampai Tanggal</label>
-                <input type="date" name="tanggal_sampai"
-                    value="{{ request('tanggal_sampai') }}"
-                    class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent">
-            </div>
-            <button type="submit"
-                class="px-6 py-2.5 bg-violet-500 hover:bg-violet-600 active:scale-95 text-white text-sm font-medium rounded-xl transition-all whitespace-nowrap">
-                Cari
-            </button>
-        </div>
 
-    </div>
-</form>
+        </div>
+    </form>
+</div>
+
+{{-- Loading --}}
+<div id="loadingIndicator" class="hidden flex flex-col items-center justify-center py-10">
+    <div class="spinner mb-3"></div>
+    <p class="text-sm text-gray-400">Sedang mencari...</p>
 </div>
 
 {{-- Hasil --}}
 @if(!empty($data))
-<div class="max-w-6xl mx-auto px-6 pb-10">
+<div class="max-w-6xl mx-auto px-4 pb-10">
     <p class="text-xs text-gray-400 mb-4 font-medium uppercase tracking-wider">
         {{ count($data) }} hasil ditemukan
     </p>
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         @foreach($data as $row)
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-2.5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
             onclick="openModal('{{ $row->ClockRequestId }}', '{{ $row->Latitude ?? '' }}', '{{ $row->Longitude ?? '' }}')">
 
-            <div class="w-full h-40 overflow-hidden rounded-xl bg-gray-100 mb-3">
+            <div class="w-full h-36 sm:h-40 overflow-hidden rounded-xl bg-gray-100 mb-2.5 relative">
                 <img src="{{ url('/foto/'.$row->ClockRequestId) }}"
-                    class="w-full h-full object-cover">
+                    class="w-full h-full object-cover"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="w-full h-full hidden items-center justify-center bg-gray-100">
+                <div class="w-full h-full absolute inset-0 hidden items-center justify-center bg-gray-100">
                     <span class="text-xs text-gray-400">Foto tidak tersedia</span>
                 </div>
             </div>
 
-            <div class="font-semibold text-gray-800 text-sm truncate">{{ $row->FullName }}</div>
+            <div class="font-semibold text-gray-800 text-xs sm:text-sm truncate">{{ $row->FullName }}</div>
             <div class="text-gray-400 text-xs font-mono mt-0.5">{{ $row->EmployeeNo }}</div>
             <div class="text-gray-400 text-xs truncate">{{ $row->BranchName }}</div>
             @if($row->DivisionName)
                 <div class="text-gray-400 text-xs truncate">{{ $row->DivisionName }}</div>
             @endif
-            <div class="mt-2 text-xs text-violet-500 font-medium">
+            <div class="mt-1.5 text-xs text-violet-500 font-medium">
                 {{ \Carbon\Carbon::parse($row->ClockDate)->format('d M Y') }} · {{ substr($row->ClockTime, 0, 5) }}
             </div>
 
@@ -192,18 +196,22 @@
 @endif
 
 {{-- Modal --}}
-<div id="modal" class="fixed inset-0 bg-black bg-opacity-80 hidden z-50 flex items-center justify-center">
-    <div class="bg-white rounded-2xl w-[90%] max-w-4xl h-[85vh] flex overflow-hidden">
-        <div class="w-1/2 bg-black flex items-center justify-center">
+<div id="modal" class="fixed inset-0 bg-black bg-opacity-80 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-4xl h-[85vh] flex flex-col sm:flex-row overflow-hidden">
+        <div class="h-1/2 sm:h-full sm:w-1/2 bg-black flex items-center justify-center">
             <img id="modalImg" class="max-h-full max-w-full object-contain">
         </div>
-        <div class="w-1/2">
+        <div class="h-1/2 sm:h-full sm:w-1/2">
             <iframe id="mapFrame" class="w-full h-full border-0"></iframe>
         </div>
     </div>
 </div>
 
 <script>
+function showLoading() {
+    document.getElementById('loadingIndicator').classList.remove('hidden');
+}
+
 // ── Autocomplete Nama ──
 let debounceTimer;
 document.getElementById('keywordInput').addEventListener('input', function() {
@@ -255,19 +263,15 @@ function pickCompany(id, name) {
     document.getElementById('companyName').value = name;
     document.getElementById('companySearch').value = name;
     compDropdown.classList.add('hidden');
-
-    // reset divisi
     document.getElementById('divisionId').value = '';
     document.getElementById('divisionName').value = '';
     document.getElementById('divisionSearch').value = '';
     document.getElementById('divisionSearch').disabled = !id;
-
-    // load divisi baru
     if (id) loadDivisions(id);
     else document.getElementById('divisionSuggestions').innerHTML = '';
 }
 
-// ── Dropdown Divisi (dynamic) ──
+// ── Dropdown Divisi ──
 const divSearch = document.getElementById('divisionSearch');
 const divDropdown = document.getElementById('divisionSuggestions');
 
@@ -300,7 +304,6 @@ function pickDivision(id, name) {
     divDropdown.classList.add('hidden');
 }
 
-// Pre-load divisi kalau PT sudah dipilih sebelumnya
 @if(request('company_id'))
     loadDivisions('{{ request('company_id') }}');
 @endif
