@@ -10,6 +10,7 @@ services:
       - .:/var/www
       - /mnt/foto:/mnt/foto
       - /mnt/data-internal:/mnt/data-internal
+      - /mnt/foto-ssd:/mnt/foto-ssd
 
   nginx:
     image: nginx:alpine
