@@ -194,16 +194,20 @@ class AbsenController extends Controller
         // Path baru (per hari) - Juli 2026 ke atas
             $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$hari/$id.jpg";
             $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$hari/$id.jpg";
+            $pathExternalLama = "/mnt/foto/FOTO/$tahun/$bulan/$id.jpg";
         } else {
         // Path lama (per bulan) - sebelum Juli 2026
             $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$id.jpg";
             $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$id.jpg";
+            $pathExternalLama = null;
         }
 
         if (file_exists($pathInternal)) {
             return response()->file($pathInternal);
         } elseif (file_exists($pathExternal)) {
             return response()->file($pathExternal);
+        } elseif ($pathExternalLama && file_exists($pathExternalLama)) {
+            return response()->file($pathExternalLama);
         } else {
             return response("File tidak ditemukan", 404);
         }
