@@ -164,10 +164,10 @@
 </div>
 
 {{-- Loading --}}
-<div id="loadingIndicator" class="hidden flex flex-col items-center justify-center py-10">
+{{--<div id="loadingIndicator" class="hidden flex flex-col items-center justify-center py-10">
     <div class="spinner mb-3"></div>
     <p class="text-sm text-gray-400">Sedang mencari...</p>
-</div>
+</div> --}}
 
 {{-- Hasil --}}
 @if(!empty($data))
@@ -218,6 +218,9 @@
 </div>
 
 <script>
+if (performance.navigation.type === 1 && window.location.search) {
+    window.location.href = '/';
+}
 function showLoading() {
     const overlay = document.getElementById('loadingOverlay');
     overlay.style.display = 'flex';
