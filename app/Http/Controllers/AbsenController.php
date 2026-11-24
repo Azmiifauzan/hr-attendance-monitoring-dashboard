@@ -185,31 +185,30 @@ class AbsenController extends Controller
 
         if (!$data) abort(404, 'Data tidak ditemukan');
 
-        $dt = new \DateTime($data->ClockDate);
+        $dt    = new \DateTime($data->ClockDate);
         $tahun = $dt->format('Y');
         $bulan = $dt->format('m');
-        $hari = $dt->format('d');
+        $hari  = $dt->format('d');
 
-        if ($tahun > 2026 || ($tahun == 2026 && $bulan >= 7)) {
-        // Path baru (per hari) - Juli 2026 ke atas
-            $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$hari/$id.jpg";
-            $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$hari/$id.jpg";
-            $pathExternalLama = "/mnt/foto/FOTO/$tahun/$bulan/$id.jpg";
-        } else {
-        // Path lama (per bulan) - sebelum Juli 2026
-            $pathInternal = "/mnt/foto-ssd/FOTO/$tahun/$bulan/$id.jpg";
-            $pathExternal = "/mnt/foto/FOTO/$tahun/$bulan/$id.jpg";
-            $pathExternalLama = null;
+        // Urutan pengecekan disk: disk baru dulu, disk lama jadi cadangan
+        $disks = [
+            '/mnt/foto-hdd/FOTO',
+            '/mnt/foto-ssd/FOTO',
+            '/mnt/foto/FOTO',
+        ];
+
+        foreach ($disks as $disk) {
+            $paths = [
+                "$disk/$tahun/$bulan/$hari/$id.jpg",
+                "$disk/$tahun/$bulan/$id.jpg",
+            ];
+            foreach ($paths as $path) {
+                if (@file_exists($path)) {
+                    return response()->file($path);
+                }
+            }
         }
 
-        if (file_exists($pathInternal)) {
-            return response()->file($pathInternal);
-        } elseif (file_exists($pathExternal)) {
-            return response()->file($pathExternal);
-        } elseif ($pathExternalLama && file_exists($pathExternalLama)) {
-            return response()->file($pathExternalLama);
-        } else {
-            return response("File tidak ditemukan", 404);
-        }
+        return response("File tidak ditemukan", 404);
     }
 }

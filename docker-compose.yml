@@ -23,6 +23,7 @@ services:
       - /mnt/foto:/mnt/foto
       - /mnt/data-internal:/mnt/data-internal
       - /mnt/foto-ssd:/mnt/foto-ssd
+      - /mnt/foto-hdd:/mnt/foto-hdd
 
   db:
     image: postgres:15
