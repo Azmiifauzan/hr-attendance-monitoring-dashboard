@@ -11,6 +11,7 @@ services:
       - /mnt/foto:/mnt/foto
       - /mnt/data-internal:/mnt/data-internal
       - /mnt/foto-ssd:/mnt/foto-ssd
+      - /mnt/foto-hdd:/mnt/foto-hdd
 
   nginx:
     image: nginx:alpine
